@@ -54,6 +54,8 @@ def _is_BTO_or_ATC(time_string):
             return 'BTO'
         if time_string=='AMC':
             return 'ATC'
+        if time_string=='DMH':
+            return 'DMH'
         return "n/a"
     else:
         if time.hour < 10:
