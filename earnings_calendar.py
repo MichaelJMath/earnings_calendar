@@ -5,6 +5,7 @@
 import csv
 import datetime as dt
 import os
+import sys, getopt
 
 from bs4 import BeautifulSoup
 from pandas.tseries.offsets import BDay
@@ -160,7 +161,34 @@ def write_to_file(calendar_dict, file_base_name='earnings_calendar',
                 writer.writerow((str_date,) + row)
 
 if __name__=='__main__':
-    DAYS_TO_FETCH = 5
-    START_DAY = 1
-    earnings_calendar = fetch_all_earnings_and_times(DAYS_TO_FETCH, START_DAY)
+    LONG_OPTS = ('days=', 'help', 'start=')
+    SHORT_OPTS = 'd:s:h'
+    days_to_fetch = 5
+    start_day = 1
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], SHORT_OPTS, LONG_OPTS)
+    except getopt.GetoptError as err:
+        print str(err)
+        sys.exit(2)
+    else:
+        for opt, arg in opts:
+            if opt in ('-h', '--help'):
+                print (
+                 'Usage: earnings_calendar.py [OPTION]...\n\n'
+                 'Fetch Earnings Calendar from EarningsWhispers.com and \n'
+                 'save to csv file\n\n'
+
+                 'Arguments\n'
+                 '  -d --days=INT       Number of days to fetch. Default=5\n'
+                 '  -s --start=INT      The first day to start (0=Today). Default=1 \n'
+                 '  -h --help           display this help message and exit'
+                )
+                sys.exit()
+            if opt in ('-d', '--days'):
+                days_to_fetch = int(arg)
+            elif opt in ('-s', '--start'):
+                start_day = int(arg)
+
+    earnings_calendar = fetch_all_earnings_and_times(days_to_fetch, start_day)
+    print earnings_calendar
     write_to_file(earnings_calendar)
