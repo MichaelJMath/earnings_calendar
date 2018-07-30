@@ -12,7 +12,7 @@ from pandas.tseries.offsets import BDay
 import requests
 
 
-def _get_page(day_num):
+def _get_page(day_num, show_more=False):
     """Gets the earnings calendar html page for the
     day at today plus day_num days
 
@@ -26,8 +26,13 @@ def _get_page(day_num):
     string
         html page text
     """
-    url = r'https://www.earningswhispers.com/calendar'
-    params={'sb':'p', 'd':day_num, 't':'all'}
+    if show_more:
+        url = r'https://www.earningswhispers.com/morecalendar'
+        params={'sb':'p', 'd':day_num, 'v':'t'}
+    else:
+        url = r'https://www.earningswhispers.com/calendar'
+        params={'sb':'p', 'd':day_num, 't':'all'}
+    
     headers={'user_agent':('Mozilla/5.0 (Windows NT 6.1; Win64; x64)'
              'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36')}
     r = requests.get(url, params=params, headers=headers)
