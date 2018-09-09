@@ -8,9 +8,11 @@ import os
 import sys, getopt
 
 from bs4 import BeautifulSoup
+import pandas as pd
 from pandas.tseries.offsets import BDay
 import requests
 
+import data_fetcher
 
 def _get_page(day_num):
     """Gets the earnings calendar html page for the
@@ -137,6 +139,11 @@ def write_to_file(calendar_dict, file_base_name='earnings_calendar',
         name of file (before appending date_time identifier)
     dest_path: string
         path to store the file
+
+    Returns
+    --------
+    file_path: string
+        path of the destination file
     """
     sorted_dates = sorted(calendar_dict.keys())
     start_date_str =  sorted_dates[0].strftime('%Y%m%d')
@@ -159,6 +166,24 @@ def write_to_file(calendar_dict, file_base_name='earnings_calendar',
             for row in calendar_dict[date]:
                 str_date = date.strftime('%a, %m/%d/%Y')
                 writer.writerow((str_date,) + row)
+
+    return file_path
+
+def append_data_to_file(file_name, fields=['price', 'average_volume_30']):
+    """Read in an Earnings Calendar csv file. Append data fields columns.
+    Then, rewrite to file"""
+
+    earnings_cal_df = pd.read_csv(file_name)
+
+    symbols = earnings_cal_df['Symbol'].tolist()
+    cc = data_fetcher.CompanyClient(symbols)
+    data_df = cc.to_dataframe(cc.fetch_data(fields))
+
+    final_df = earnings_cal_df.merge(data_df, how='left',left_on='Symbol',
+                                     right_index=True)
+
+    final_df.to_csv(file_name, index=False)
+
 
 if __name__=='__main__':
     LONG_OPTS = ('days=', 'help', 'start=')
@@ -190,4 +215,8 @@ if __name__=='__main__':
                 start_day = int(arg)
 
     earnings_calendar = fetch_all_earnings_and_times(days_to_fetch, start_day)
-    write_to_file(earnings_calendar)
+    file_path = write_to_file(earnings_calendar)
+
+    data_fields = ['price', 'average_volume_30']
+    append_data_to_file(file_path, data_fields)
+
