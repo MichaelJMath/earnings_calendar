@@ -1,0 +1,8 @@
+name: earnings_calendar_env
+
+dependencies:
+  - python=2
+  - numpy
+  - pandas
+  - beautifulsoup4
+  - requests
