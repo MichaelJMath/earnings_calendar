@@ -32,7 +32,7 @@ class CompanyClient(pycharts.CompanyClient):
              symbol_2: {field1: data1, field2: data2}
              }
         """
-        response = self.get_points(self.symbol_list, field_list)['response']
+        response = self.get_points(self.symbol_list, fields)['response']
 
         # data_dict keyed by symbol
         data_dict = {}
@@ -45,7 +45,7 @@ class CompanyClient(pycharts.CompanyClient):
                     data_dict[symbol][data_point] = \
                         symbol_data[data_point]['data'][1]
             else:
-                data_dict[symbol] = {field:np.nan for field in field_list}
+                data_dict[symbol] = {field:np.nan for field in fields}
         return data_dict
 
     def to_dataframe(self, data_dict):
