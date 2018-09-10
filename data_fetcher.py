@@ -32,20 +32,26 @@ class CompanyClient(pycharts.CompanyClient):
              symbol_2: {field1: data1, field2: data2}
              }
         """
-        response = self.get_points(self.symbol_list, fields)['response']
+        n_symbols = len(self.symbol_list)
+        n_iters = n_symbols // 100 + 1
 
         # data_dict keyed by symbol
         data_dict = {}
+        for i in range(0, n_iters):
+            start = i*100
+            end = (i+1) * 100
+            response = self.get_points(self.symbol_list[start:end],
+                                       fields)['response']
 
-        for symbol in response:
-            if response[symbol]['meta']['status'] == 'ok':
-                symbol_data = response[symbol]['results']
-                data_dict[symbol] = {}
-                for data_point in symbol_data:
-                    data_dict[symbol][data_point] = \
-                        symbol_data[data_point]['data'][1]
-            else:
-                data_dict[symbol] = {field:np.nan for field in fields}
+            for symbol in response:
+                if response[symbol]['meta']['status'] == 'ok':
+                    symbol_data = response[symbol]['results']
+                    data_dict[symbol] = {}
+                    for data_point in symbol_data:
+                        data_dict[symbol][data_point] = \
+                            symbol_data[data_point]['data'][1]
+                else:
+                    data_dict[symbol] = {field:np.nan for field in fields}
         return data_dict
 
     def to_dataframe(self, data_dict):
